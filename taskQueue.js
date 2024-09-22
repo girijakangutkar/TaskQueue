@@ -11,10 +11,13 @@ taskQueue.process(async (job) => {
   try {
     console.log(`Processing job: ${JSON.stringify(job.data)}`);
     const { user_id, task } = job.data;
-    await task(user_id);
-    console.log(`Completed job for user_id: ${user_id}`);
+    const taskFunction = eval(`(${task})`);
+    const result = await taskFunction(user_id);
+    console.log(`Completed job for user_id: ${user_id}, result: ${result}`);
+    return result;
   } catch (err) {
-    console.log(err);
+    console.error(`Error processing job: ${err}`);
+    throw err;
   }
 });
 
