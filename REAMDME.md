@@ -55,7 +55,7 @@ Task completion logs are stored in `task_logs.log`.
 
 ## To test this
 
-open another command promt as administrator along with the one which has redis runnign on it. Type in new server to queue a task 
+open another command promt as along with the one which has redis runnign on it. Type in new command promt the below line to queue a task 
 
 ```
 curl -X POST -H "Content-Type: application/json" -d "{\"user_id\": \"123\"}" http://localhost:3000/api/v1/task
