@@ -1,6 +1,6 @@
 ![alt text](https://github.com/girijakangutkar/TaskQueue/blob/girija/Screenshot%20(150).png)
 
-![alt text](https://github.com/girijakangutkar/TaskQueue/blob/girija/Screenshot%20(150).png)
+![alt text](https://github.com/girijakangutkar/TaskQueue/blob/girija/Screenshot%20(151).png)
 
 # Node.js Task Queue with Rate Limiting
 
