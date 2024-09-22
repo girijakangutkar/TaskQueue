@@ -7,6 +7,7 @@ const taskQueue = require("./taskQueue");
 const app = express();
 app.use(express.json());
 app.use(express.static("public"));
+
 // Set up Redis client
 const redisClient = redis.createClient({
   host: "localhost",
@@ -30,15 +31,17 @@ const logger = winston.createLogger({
 });
 
 // Task function
-async function task(user_id) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const message = `${user_id}-task completed at-${Date.now()}`;
-      console.log(message);
-      logger.info(message);
-      resolve(message);
-    }, 1000); // Simulate some work
-  });
+function createTaskFunction(logger) {
+  return async function task(user_id) {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const message = `${user_id}-task completed at-${Date.now()}`;
+        console.log(message);
+        logger.info(message);
+        resolve(message);
+      }, 1000); // Simulate some work
+    });
+  };
 }
 
 app.post("/api/v1/task", async (req, res) => {
@@ -51,18 +54,35 @@ app.post("/api/v1/task", async (req, res) => {
   try {
     await rateLimiter.consume(user_id);
     // If rate limit is not exceeded, add task to queue
-    await taskQueue.add({ user_id, task: task.toString() });
+    await taskQueue.add({
+      user_id,
+      taskFunction: createTaskFunction.toString(),
+      loggerOptions: {
+        filename: "task_logs.log",
+        level: "info",
+        format: "json",
+      },
+    });
     res.json({ message: "Task queued successfully" });
   } catch (rejRes) {
     // If rate limit is exceeded, add task to queue with delay
     const delay = Math.floor(rejRes.msBeforeNext / 1000) || 1;
     await taskQueue.add(
-      { user_id, task: task.toString() },
+      {
+        user_id,
+        taskFunction: createTaskFunction.toString(),
+        loggerOptions: {
+          filename: "task_logs.log",
+          level: "info",
+          format: "json",
+        },
+      },
       { delay: delay * 1000 }
     );
     res.json({ message: `Task queued with delay of ${delay} seconds` });
   }
 });
+
 const fs = require("fs");
 
 app.get("/api/logs", (req, res) => {
