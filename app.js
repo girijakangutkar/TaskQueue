@@ -31,9 +31,14 @@ const logger = winston.createLogger({
 
 // Task function
 async function task(user_id) {
-  const message = `${user_id}-task completed at-${Date.now()}`;
-  console.log(message);
-  logger.info(message);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const message = `${user_id}-task completed at-${Date.now()}`;
+      console.log(message);
+      logger.info(message);
+      resolve(message);
+    }, 1000); // Simulate some work
+  });
 }
 
 app.post("/api/v1/task", async (req, res) => {
@@ -46,16 +51,18 @@ app.post("/api/v1/task", async (req, res) => {
   try {
     await rateLimiter.consume(user_id);
     // If rate limit is not exceeded, add task to queue
-    taskQueue.add({ user_id, task });
+    await taskQueue.add({ user_id, task: task.toString() });
     res.json({ message: "Task queued successfully" });
   } catch (rejRes) {
     // If rate limit is exceeded, add task to queue with delay
     const delay = Math.floor(rejRes.msBeforeNext / 1000) || 1;
-    taskQueue.add({ user_id, task }, { delay: delay * 1000 });
+    await taskQueue.add(
+      { user_id, task: task.toString() },
+      { delay: delay * 1000 }
+    );
     res.json({ message: `Task queued with delay of ${delay} seconds` });
   }
 });
-
 const fs = require("fs");
 
 app.get("/api/logs", (req, res) => {
