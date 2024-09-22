@@ -53,7 +53,7 @@ The API implements rate limiting of 1 task per second and 20 tasks per minute fo
 
 Task completion logs are stored in `task_logs.log`.
 
-##To test this
+## To test this
 
 open another command promt as administrator along with the one which has redis runnign on it. Type in new server to queue a task 
 
